@@ -3,35 +3,54 @@ package money;
 public class Cashier {
 	static CashRegister[] cashie = {new CashRegister(), new CashRegister(), new CashRegister(), new CashRegister(), new CashRegister()};
 	
-	public static void main(String[] args) {	
+	public static void main(String[] cheese) {	
 		int[] changeArray = new int[5];	
-		int[] cash = {0, 0, 0, 0, 0};
-		storeChange(cashie[0], cash); //put some change in the register in preparation for bake sale
-		System.out.println("Cash register starts operations with " + cashie[0].getStoredCashValue() + " dollars\n");
-	
-		double cost = 0.90;
-		int[] paidWith = {1, 0, 0, 0, 0};
+		int[] initialCash = {6, 0, 0, 0, 0};
+		storeChange(cashie[0], initialCash); //put some change in the register in preparation for bake sale
+		System.out.println("Cash register starts operations with " + cashie[0].getStoredCashValue() + " dollars, in:");
+		printMoneyArray(initialCash);
 		
-		storeChange(cashie[0], paidWith);
-		System.out.println("Customer paid " + returnChange(paidWith) + ", cost is " + cost + "\n");
-		double owedToCustomer = Double.valueOf(String.format("%.3g", returnChange(paidWith)-cost));
-		changeArray = returnChange(owedToCustomer);
-		System.out.println("Owed to customer: " + owedToCustomer);
-		printMoneyArray(changeArray);
-		System.out.println("");
-		takeChange(cashie[0], changeArray, paidWith);
+		double cost = 0.36;
+		int[] paidWith = {4, 0, 0, 0, 0};
+		
+		transaction(cashie[0], cost, paidWith, initialCash);
 		
 		System.out.println("Cash register finishes operations with " + String.format("%.3g", cashie[0].getStoredCashValue()) + " dollars");
 		
 	}
 	
-	public static void takeChange(CashRegister cashie, int[] changeArray, int[] paidWith) { //subtract coins from register, undo the operation if unsuccessful
+	public static void transaction(CashRegister cashie, double itemCost, int[] paidWith, int[] cash) {
+		int[] changeArray = new int[5];
+		storeChange(cashie, paidWith);
+		System.out.println("Customer paid " + returnChange(paidWith) + ", cost is " + itemCost + ". Register now contains:");
+		printMoneyArray(addArrays(cash, paidWith));
+		double owedToCustomer = Double.valueOf(String.format("%.3g", returnChange(paidWith)-itemCost));
+		changeArray = returnChange(owedToCustomer);
+		System.out.println("Owed to customer: " + owedToCustomer);
+		printMoneyArray(changeArray);
+		takeChange(cashie, changeArray, paidWith);
+	} 
+	
+	public static int[] addArrays(int[] arr1, int[] arr2) {
+		int[] addedArr = new int[5];
+		
+		if(arr1.length==arr2.length) {
+			for(int i=0;i<arr1.length;i++) {
+				addedArr[i] = arr1[i]+arr2[i];
+			}
+			return addedArr;
+		} else {
+			return new int[] {0, 0, 0, 0, 0};
+		}
+	}
+	
+	public static void takeChange(CashRegister cashie, int[] changeArray, int[] paidWith) { //subtract coins from register, pay back customer if unsuccessful
 		try { 
 			takeRawChange(cashie, changeArray);
 			System.out.println("Operation successfull!");
 		} catch (Exception e) {
 			
-			try {takeRawChange(cashie, paidWith);} catch (Exception e2) {e.printStackTrace();}
+			try {takeRawChange(cashie, paidWith);} catch (Exception e2) {e.printStackTrace();} //pay the customer back
 			
 			String errored = e.getMessage().substring(11);
 			System.out.print("Not enough " + errored + " in register to make change!");
@@ -119,5 +138,6 @@ public class Cashier {
 		for(int i=0;i<arr.length;i++) {
 			System.out.println(arr[i] + texts[i]);
 		}
+		System.out.println("");
 	}
 }
